@@ -276,6 +276,7 @@ html, body {
   flex-direction: column;
   gap: 6px;
   padding: 0.5rem;
+  padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
   flex-shrink: 0;
 }
 
@@ -447,6 +448,7 @@ html, body {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  height: 100dvh;
   max-width: 720px;
   margin: 0 auto;
 }
