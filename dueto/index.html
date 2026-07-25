@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Dueto – 2 Palavras Simultâneas</title>
+  <meta name="description" content="Arquivo pessoal do Dueto – jogue os puzzles da última semana">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#6E5C62">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .boards-container { gap: 0.8rem; }
+    .board-label {
+      text-align: center;
+      font-size: 0.7rem;
+      font-weight: 300;
+      color: var(--color-text-dim);
+      margin-bottom: 4px;
+      letter-spacing: 1px;
+    }
+    .board-wrapper { display: flex; flex-direction: column; }
+    @media (max-width: 480px) { :root { --tile-size: min(46px, 12.5vw); } }
+  </style>
+</head>
+<body>
+<div class="app" id="app">
+  <header class="header">
+    <div>
+      <div class="header-title">DUETO</div>
+      <div class="header-subtitle">2 palavras · 7 tentativas</div>
+    </div>
+    <nav class="header-nav">
+      <button class="btn-icon" id="btn-help">❓</button>
+      <button class="btn-icon" id="btn-stats">📊</button>
+      <a class="btn-icon" href="../">🏠</a>
+    </nav>
+  </header>
+
+  <div class="date-nav">
+    <button class="date-btn" id="btn-prev">← Anterior</button>
+    <span class="date-current" id="date-display">carregando...</span>
+    <button class="date-btn" id="btn-next">Próximo →</button>
+  </div>
+  <div class="date-nav" style="padding-top:0">
+    <div class="date-day-pills" id="day-pills"></div>
+  </div>
+
+  <div class="notification" id="notification"></div>
+
+  <div class="game-area">
+    <div class="boards-container" id="boards-container"></div>
+    <div class="gameover-info" id="gameover-info"></div>
+  </div>
+
+  <div class="keyboard" id="keyboard">
+    <div class="keyboard-row">
+      <button class="key" data-key="q">Q</button><button class="key" data-key="w">W</button>
+      <button class="key" data-key="e">E</button><button class="key" data-key="r">R</button>
+      <button class="key" data-key="t">T</button><button class="key" data-key="y">Y</button>
+      <button class="key" data-key="u">U</button><button class="key" data-key="i">I</button>
+      <button class="key" data-key="o">O</button><button class="key" data-key="p">P</button>
+    </div>
+    <div class="keyboard-row">
+      <button class="key" data-key="a">A</button><button class="key" data-key="s">S</button>
+      <button class="key" data-key="d">D</button><button class="key" data-key="f">F</button>
+      <button class="key" data-key="g">G</button><button class="key" data-key="h">H</button>
+      <button class="key" data-key="j">J</button><button class="key" data-key="k">K</button>
+      <button class="key" data-key="l">L</button>
+    </div>
+    <div class="keyboard-row">
+      <button class="key wide" data-key="Enter">↵ Enviar</button>
+      <button class="key" data-key="z">Z</button><button class="key" data-key="x">X</button>
+      <button class="key" data-key="c">C</button><button class="key" data-key="v">V</button>
+      <button class="key" data-key="b">B</button><button class="key" data-key="n">N</button>
+      <button class="key" data-key="m">M</button>
+      <button class="key wide" data-key="Backspace">⌫</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-help">
+  <div class="modal" style="max-width:380px">
+    <button class="modal-close" id="close-help">✕</button>
+    <h2>DUETO – COMO JOGAR</h2>
+    <p>Descubra <strong>2 palavras simultâneas</strong> em 7 tentativas. Cada chute é usado em ambas as palavras!</p>
+    <p>As cores mostram o quão perto você está de cada palavra separadamente.</p>
+    <p>🟩 Letra correta na posição certa &nbsp; 🟨 Letra certa, posição errada &nbsp; ⬛ Letra não existe</p>
+    <p style="margin-top:1rem">Use os botões <strong>← Anterior / Próximo →</strong> para jogar puzzles dos últimos dias.</p>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-stats">
+  <div class="modal" style="max-width:360px; text-align:center">
+    <button class="modal-close" id="close-stats">✕</button>
+    <h2>ESTATÍSTICAS – DUETO</h2>
+    <div class="stats-grid" id="stats-grid"></div>
+    <p id="stats-status"></p>
+  </div>
+</div>
+
+<script src="../assets/words_data.js"></script>
+<script src="../assets/game.js"></script>
+<script>
+(function() {
+  'use strict';
+  
+  const MODE = 2;
+  const MAX_ROWS = 7;
+  const WORD_LEN = 5;
+  const NUM_BOARDS = 2;
+  
+  let currentDayIdx = TERMO.getDayIndex();
+  let targetWords = [];
+  let displayWords = [];
+  let currentRow = 0;
+  let currentInput = [];
+  let gameOver = false;
+  let boardWon = [false, false];
+  let guesses = [];
+  let keyStates = {};
+  
+  const urlParams = new URLSearchParams(location.search);
+  const dateParam = urlParams.get('data');
+  if (dateParam) {
+    const p = TERMO.getDayIndex(new Date(dateParam));
+    if (!isNaN(p) && p >= 0) currentDayIdx = p;
+  }
+  
+  function init() {
+    loadDay(currentDayIdx);
+    setupEventListeners();
+    if (!localStorage.getItem('dueto_seen_help')) {
+      document.getElementById('modal-help').classList.add('open');
+      localStorage.setItem('dueto_seen_help', '1');
+    }
+  }
+  
+  function loadDay(dayIdx) {
+    currentDayIdx = dayIdx;
+    const date = TERMO.formatDate(TERMO.getDateFromIndex(dayIdx));
+    history.replaceState(null, '', `?data=${date}`);
+    
+    const raw = TERMO.getAnswerForDay(dayIdx, MODE);
+    displayWords = raw;
+    targetWords = raw.map(w => TERMO.normalizeWord(w));
+    
+    const dateObj = TERMO.getDateFromIndex(dayIdx);
+    const isToday = dayIdx === TERMO.getDayIndex();
+    document.getElementById('date-display').textContent = 
+      isToday ? `📅 Hoje — ${TERMO.formatDateBR(dateObj)}` : TERMO.formatDateBR(dateObj);
+    
+    currentRow = 0; currentInput = []; gameOver = false;
+    boardWon = [false, false]; guesses = []; keyStates = {};
+    
+    renderBoards();
+    document.querySelectorAll('.key').forEach(k => {
+      k.className = k.dataset.key.length === 1 ? 'key' : 'key wide';
+    });
+    
+    const saved = TERMO.loadState(MODE, dayIdx);
+    if (saved) restoreState(saved);
+    
+    updateDayPills(); updateNavButtons();
+    document.getElementById('gameover-info').textContent = '';
+  }
+  
+  function renderBoards() {
+    const container = document.getElementById('boards-container');
+    container.innerHTML = '';
+    
+    for (let b = 0; b < NUM_BOARDS; b++) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'board-wrapper';
+      
+      const label = document.createElement('div');
+      label.className = 'board-label';
+      label.textContent = `Palavra ${b + 1}`;
+      wrapper.appendChild(label);
+      
+      const board = document.createElement('div');
+      board.className = 'board';
+      board.id = `board-${b}`;
+      
+      for (let r = 0; r < MAX_ROWS; r++) {
+        const row = document.createElement('div');
+        row.className = 'board-row';
+        row.id = `row-${b}-${r}`;
+        for (let c = 0; c < WORD_LEN; c++) {
+          const tile = document.createElement('div');
+          tile.className = 'tile';
+          tile.id = `tile-${b}-${r}-${c}`;
+          row.appendChild(tile);
+        }
+        board.appendChild(row);
+      }
+      wrapper.appendChild(board);
+      container.appendChild(wrapper);
+    }
+  }
+  
+  function getTile(board, row, col) {
+    return document.getElementById(`tile-${board}-${row}-${col}`);
+  }
+  
+  function handleKey(key) {
+    if (gameOver) return;
+    key = key.toLowerCase();
+    if (key === 'enter') { submitGuess(); }
+    else if (key === 'backspace') { if (currentInput.length > 0) { currentInput.pop(); updateCurrentRow(); } }
+    else if (/^[a-záéíóúâêîôûãõçàü]$/.test(key) && currentInput.length < WORD_LEN) {
+      currentInput.push(key); updateCurrentRow();
+    }
+  }
+  
+  function updateCurrentRow() {
+    for (let b = 0; b < NUM_BOARDS; b++) {
+      if (boardWon[b]) continue;
+      for (let c = 0; c < WORD_LEN; c++) {
+        const tile = getTile(b, currentRow, c);
+        if (!tile) continue;
+        const letter = currentInput[c] || '';
+        tile.textContent = letter.toUpperCase();
+        tile.className = `tile${letter ? ' filled' : ''}`;
+      }
+    }
+  }
+  
+  function submitGuess() {
+    if (currentInput.length < WORD_LEN) { showNotification('Palavra incompleta'); shakeAll(); return; }
+    const guessStr = currentInput.join('');
+    if (!TERMO.isValidWord(guessStr)) { showNotification('Palavra não encontrada'); shakeAll(); return; }
+    
+    const results = targetWords.map(target => TERMO.checkGuess(currentInput, target.split('')));
+    const accented = TERMO.denormalizeWord(guessStr);
+    const dispArr = typeof accented === 'string' ? accented.split('') : currentInput;
+    
+    let pendingAnimations = 0;
+    
+    for (let b = 0; b < NUM_BOARDS; b++) {
+      if (boardWon[b]) continue;
+      pendingAnimations++;
+      animateTiles(b, currentRow, currentInput, dispArr, results[b], () => {
+        pendingAnimations--;
+        if (pendingAnimations === 0) afterGuess(results);
+      });
+    }
+    
+    guesses.push({ guess: [...currentInput], results });
+    currentInput = [];
+  }
+  
+  function afterGuess(results) {
+    // Update keyboard with best result across boards
+    const combined = new Array(WORD_LEN);
+    guesses[guesses.length - 1].guess.forEach((letter, i) => {
+      const best = results.reduce((best, r) => {
+        const p = { right: 3, place: 2, wrong: 1 };
+        return p[r[i]] > p[best] ? r[i] : best;
+      }, 'wrong');
+      combined[i] = best;
+    });
+    updateKeyboard(guesses[guesses.length - 1].guess, combined);
+    
+    // Check each board
+    for (let b = 0; b < NUM_BOARDS; b++) {
+      if (results[b].every(r => r === 'right')) boardWon[b] = true;
+    }
+    
+    const allWon = boardWon.every(Boolean);
+    const rowsDone = currentRow >= MAX_ROWS - 1;
+    
+    if (allWon || rowsDone) {
+      gameOver = true;
+      if (allWon) {
+        const msgs = ['Incrível!', 'Fantástico!', 'Excelente!', 'Muito bem!', 'Boa!', 'Ufa!', 'Por pouco!'];
+        setTimeout(() => showNotification(msgs[Math.min(currentRow, 6)], 2500), 300);
+      } else {
+        setTimeout(() => showNotification(displayWords.join(', ').toUpperCase(), 3500), 300);
+      }
+      showGameOver(allWon);
+    } else {
+      currentRow++;
+      updateCurrentRow();
+    }
+    
+    saveCurrentState(allWon || rowsDone, allWon);
+    updateDayPills();
+  }
+  
+  function animateTiles(board, row, letters, displayLetters, result, callback) {
+    let done = 0;
+    for (let c = 0; c < WORD_LEN; c++) {
+      const tile = getTile(board, row, c);
+      if (displayLetters[c]) tile.textContent = displayLetters[c].toUpperCase();
+      setTimeout(() => {
+        tile.className = `tile ${result[c]}`;
+        done++;
+        if (done === WORD_LEN && callback) callback();
+      }, c * 250 + 100);
+    }
+  }
+  
+  function shakeAll() {
+    for (let b = 0; b < NUM_BOARDS; b++) {
+      if (boardWon[b]) continue;
+      for (let c = 0; c < WORD_LEN; c++) {
+        const tile = getTile(b, currentRow, c);
+        if (tile) { tile.classList.add('shake'); setTimeout(() => tile.classList.remove('shake'), 600); }
+      }
+    }
+  }
+  
+  function updateKeyboard(letters, result) {
+    const priority = { right: 3, place: 2, wrong: 1 };
+    letters.forEach((letter, i) => {
+      const current = keyStates[letter];
+      const newState = result[i];
+      if (!current || priority[newState] > priority[current]) keyStates[letter] = newState;
+    });
+    document.querySelectorAll('.key[data-key]').forEach(key => {
+      const k = key.dataset.key.toLowerCase();
+      if (keyStates[k]) {
+        key.className = `key ${keyStates[k]}`;
+        if (key.dataset.key.length > 1) key.classList.add('wide');
+      }
+    });
+  }
+  
+  let notifTimer;
+  function showNotification(msg, duration = 1800) {
+    const el = document.getElementById('notification');
+    el.textContent = msg; el.classList.add('show');
+    clearTimeout(notifTimer);
+    notifTimer = setTimeout(() => el.classList.remove('show'), duration);
+  }
+  
+  function showGameOver(win) {
+    const el = document.getElementById('gameover-info');
+    if (win) el.innerHTML = `✅ Ambas descobertas!`;
+    else el.innerHTML = `❌ As palavras eram: <strong>${displayWords.map(w=>w.toUpperCase()).join(', ')}</strong>`;
+  }
+  
+  function saveCurrentState(isOver, isWon) {
+    TERMO.saveState(MODE, currentDayIdx, { guesses, currentRow, gameOver: isOver, won: isWon, boardWon, keyStates });
+  }
+  
+  function restoreState(state) {
+    if (!state?.guesses) return;
+    state.guesses.forEach(({ guess, results }, row) => {
+      const acc = TERMO.denormalizeWord(guess.join(''));
+      const dispArr = typeof acc === 'string' ? acc.split('') : guess;
+      for (let b = 0; b < NUM_BOARDS; b++) {
+        if (!results?.[b]) continue;
+        for (let c = 0; c < WORD_LEN; c++) {
+          const tile = getTile(b, row, c);
+          if (tile) { tile.textContent = (dispArr[c] || guess[c] || '').toUpperCase(); tile.className = `tile ${results[b][c]}`; }
+        }
+      }
+      // Update keyboard
+      const combined = new Array(WORD_LEN);
+      guess.forEach((l, i) => {
+        const p = { right: 3, place: 2, wrong: 1 };
+        const best = results.reduce((best, r) => r && p[r[i]] > p[best] ? r[i] : best, 'wrong');
+        combined[i] = best;
+      });
+      updateKeyboard(guess, combined);
+    });
+    currentRow = state.currentRow || state.guesses.length;
+    gameOver = state.gameOver || false;
+    boardWon = state.boardWon || [false, false];
+    keyStates = state.keyStates || {};
+    if (gameOver) showGameOver(state.won);
+    else updateCurrentRow();
+  }
+  
+  function updateDayPills() {
+    const container = document.getElementById('day-pills');
+    container.innerHTML = '';
+    const today = TERMO.getDayIndex();
+    TERMO.getAvailableDays(today, 7).forEach(dayIdx => {
+      const pill = document.createElement('button');
+      const saved = TERMO.loadState(MODE, dayIdx);
+      const isToday = dayIdx === today;
+      pill.textContent = isToday ? 'Hoje' : TERMO.formatDateBR(TERMO.getDateFromIndex(dayIdx)).slice(0,5);
+      pill.className = 'day-pill';
+      if (dayIdx === currentDayIdx) pill.classList.add('current');
+      if (saved?.won) pill.classList.add('won');
+      else if (saved?.gameOver) pill.classList.add('lost');
+      pill.addEventListener('click', () => loadDay(dayIdx));
+      container.appendChild(pill);
+    });
+  }
+  
+  function updateNavButtons() {
+    const today = TERMO.getDayIndex();
+    document.getElementById('btn-prev').disabled = currentDayIdx <= today - 6;
+    document.getElementById('btn-next').disabled = currentDayIdx >= today;
+  }
+  
+  function setupEventListeners() {
+    document.addEventListener('keydown', e => {
+      if (e.target.closest('.modal-overlay') || e.ctrlKey || e.altKey || e.metaKey) return;
+      handleKey(e.key);
+    });
+    document.getElementById('keyboard').addEventListener('click', e => {
+      const key = e.target.closest('[data-key]');
+      if (key) handleKey(key.dataset.key);
+    });
+    document.getElementById('btn-prev').addEventListener('click', () => {
+      if (currentDayIdx > TERMO.getDayIndex() - 6) loadDay(currentDayIdx - 1);
+    });
+    document.getElementById('btn-next').addEventListener('click', () => {
+      if (currentDayIdx < TERMO.getDayIndex()) loadDay(currentDayIdx + 1);
+    });
+    document.getElementById('btn-help').addEventListener('click', () => document.getElementById('modal-help').classList.add('open'));
+    document.getElementById('close-help').addEventListener('click', () => document.getElementById('modal-help').classList.remove('open'));
+    document.getElementById('btn-stats').addEventListener('click', () => { renderStats(); document.getElementById('modal-stats').classList.add('open'); });
+    document.getElementById('close-stats').addEventListener('click', () => document.getElementById('modal-stats').classList.remove('open'));
+    document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); }));
+  }
+  
+  function renderStats() {
+    const today = TERMO.getDayIndex();
+    let played = 0, wins = 0;
+    TERMO.getAvailableDays(today, 30).forEach(d => {
+      const s = TERMO.loadState(MODE, d);
+      if (s?.gameOver) { played++; if (s.won) wins++; }
+    });
+    document.getElementById('stats-grid').innerHTML = `
+      <div class="stat-box"><div class="stat-num">${played}</div><div class="stat-label">Jogados</div></div>
+      <div class="stat-box"><div class="stat-num">${played ? Math.round(wins/played*100) : 0}%</div><div class="stat-label">Vitórias</div></div>
+      <div class="stat-box"><div class="stat-num">${wins}</div><div class="stat-label">Vitórias</div></div>
+      <div class="stat-box"><div class="stat-num">${played-wins}</div><div class="stat-label">Derrotas</div></div>
+    `;
+  }
+  
+  init();
+})();
+</script>
+</body>
+</html>

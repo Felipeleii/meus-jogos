@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>Jogos de Palavras – Arquivo Pessoal</title>
+  <meta name="description" content="Arquivo pessoal dos jogos Termo, Dueto e Quarteto">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#6E5C62">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #6e5c62;
+      --bg-dark: #3d2d33;
+      --bg-card: rgba(255,255,255,0.08);
+      --bg-card-hover: rgba(255,255,255,0.14);
+      --text: #fafaff;
+      --text-dim: #c4aeb8;
+      --right: #3aa394;
+      --place: #d3ad69;
+      --wrong: #312a2c;
+      --font: 'Mitr', sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      font-family: var(--font);
+      color: var(--text);
+    }
+    
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+    
+    /* Header */
+    .logo {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    
+    .logo-tiles {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+    
+    .logo-tile {
+      width: 52px; height: 52px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; font-weight: 700;
+      border-radius: 10%;
+      text-transform: uppercase;
+    }
+    
+    .logo-tile.r { background: var(--right); }
+    .logo-tile.p { background: var(--place); }
+    .logo-tile.w { background: var(--wrong); }
+    .logo-tile.e { border: 2px solid rgba(255,255,255,.3); }
+    
+    .logo h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      letter-spacing: 4px;
+      color: var(--text);
+    }
+    
+    .logo p {
+      font-size: 0.9rem;
+      font-weight: 300;
+      color: var(--text-dim);
+      margin-top: 0.3rem;
+      letter-spacing: 1px;
+    }
+    
+    /* Cards */
+    .cards {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      width: 100%;
+      max-width: 380px;
+    }
+    
+    .card {
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 16px;
+      padding: 1.5rem;
+      text-decoration: none;
+      color: var(--text);
+      transition: all .2s;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,.04), transparent);
+      pointer-events: none;
+    }
+    
+    .card:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(255,255,255,.25);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,.25);
+    }
+    
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    .card-icon {
+      font-size: 2.5rem;
+      line-height: 1;
+    }
+    
+    .card-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+    }
+    
+    .card-sub {
+      font-size: 0.75rem;
+      font-weight: 300;
+      color: var(--text-dim);
+      letter-spacing: 1px;
+    }
+    
+    .card-desc {
+      font-size: 0.82rem;
+      font-weight: 300;
+      color: var(--text-dim);
+      line-height: 1.5;
+      margin-bottom: 1rem;
+    }
+    
+    /* Mini board preview */
+    .mini-boards {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 1rem;
+    }
+    
+    .mini-board {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    
+    .mini-row { display: flex; gap: 3px; }
+    
+    .mini-tile {
+      width: 18px; height: 18px;
+      border-radius: 3px;
+      border: 1.5px solid rgba(255,255,255,.2);
+    }
+    .mini-tile.r { background: var(--right); border-color: var(--right); }
+    .mini-tile.p { background: var(--place); border-color: var(--place); }
+    .mini-tile.w { background: var(--wrong); border-color: var(--wrong); }
+    
+    /* Status badges */
+    .card-status {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    
+    .status-badge {
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 500;
+    }
+    
+    .badge-today { background: rgba(58,163,148,.3); color: #6ff0df; }
+    .badge-week { background: rgba(255,255,255,.1); color: var(--text-dim); }
+    .badge-won { background: rgba(58,163,148,.4); color: #6ff0df; }
+    .badge-pending { background: rgba(211,173,105,.3); color: #f0d88a; }
+    
+    .arrow {
+      margin-left: auto;
+      font-size: 1.2rem;
+      color: var(--text-dim);
+      transition: transform .2s;
+    }
+    
+    .card:hover .arrow { transform: translateX(4px); }
+    
+    /* Footer */
+    footer {
+      margin-top: 2.5rem;
+      text-align: center;
+      font-size: 0.72rem;
+      font-weight: 300;
+      color: var(--text-dim);
+      line-height: 1.8;
+    }
+    
+    footer a { color: var(--text-dim); text-decoration: underline dotted; }
+    
+    @media (max-width: 400px) {
+      .logo-tile { width: 44px; height: 44px; font-size: 1.2rem; }
+      .logo h1 { font-size: 1.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="logo">
+  <div class="logo-tiles">
+    <div class="logo-tile r">T</div>
+    <div class="logo-tile e">E</div>
+    <div class="logo-tile p">R</div>
+    <div class="logo-tile w">M</div>
+    <div class="logo-tile r">O</div>
+  </div>
+  <h1>JOGOS</h1>
+  <p>Arquivo pessoal · Últimos 7 dias</p>
+</div>
+
+<div class="cards">
+  
+  <a class="card" href="termo/" id="card-termo">
+    <div class="card-header">
+      <span class="card-icon">1️⃣</span>
+      <div>
+        <div class="card-title">TERMO</div>
+        <div class="card-sub">1 palavra · 6 tentativas</div>
+      </div>
+      <span class="arrow">→</span>
+    </div>
+    <div class="mini-boards">
+      <div class="mini-board">
+        <div class="mini-row"><div class="mini-tile"></div><div class="mini-tile"></div><div class="mini-tile"></div><div class="mini-tile"></div><div class="mini-tile"></div></div>
+        <div class="mini-row"><div class="mini-tile p"></div><div class="mini-tile"></div><div class="mini-tile"></div><div class="mini-tile r"></div><div class="mini-tile"></div></div>
+        <div class="mini-row"><div class="mini-tile r"></div><div class="mini-tile r"></div><div class="mini-tile r"></div><div class="mini-tile r"></div><div class="mini-tile r"></div></div>
+      </div>
+    </div>
+    <div class="card-status" id="status-termo">
+      <span class="status-badge badge-week">📅 Últimos 7 dias</span>
+    </div>
+  </a>
+
+  <a class="card" href="dueto/" id="card-dueto">
+    <div class="card-header">
+      <span class="card-icon">2️⃣</span>
+      <div>
+        <div class="card-title">DUETO</div>
+        <div class="card-sub">2 palavras · 7 tentativas</div>
+      </div>
+      <span class="arrow">→</span>
+    </div>
+    <div class="mini-boards">
+      <div class="mini-board">
+        <div class="mini-row"><div class="mini-tile"></div><div class="mini-tile"></div><div class="mini-tile"></div><div class="mini-tile"></div><div class="mini-tile"></div></div>
+        <div class="mini-row"><div class="mini-tile w"></div><div class="mini-tile r"></div><div class="mini-tile"></div><div class="mini-tile p"></div><div class="mini-tile"></div></div>
+        <div class="mini-row"><div class="mini-tile r"></div><div class="mini-tile r"></div><div class="mini-tile r"></div><div class="mini-tile r"></div><div class="mini-tile r"></div></div>
+      </div>
+      <div class="mini-board">
+        <div class="mini-row"><div class="mini-tile p"></div><div class="mini-tile"></div><div class="mini-tile"></div><div class="mini-tile"></div><div class="mini-tile r"></div></div>
+        <div class="mini-row"><div class="mini-tile"></div><div class="mini-tile p"></div><div class="mini-tile r"></div><div class="mini-tile"></div><div class="mini-tile r"></div></div>
+        <div class="mini-row"><div class="mini-tile r"></div><div class="mini-tile r"></div><div class="mini-tile r"></div><div class="mini-tile r"></div><div class="mini-tile r"></div></div>
+      </div>
+    </div>
+    <div class="card-status" id="status-dueto">
+      <span class="status-badge badge-week">📅 Últimos 7 dias</span>
+    </div>
+  </a>
+
+  <a class="card" href="quarteto/" id="card-quarteto">
+    <div class="card-header">
+      <span class="card-icon">4️⃣</span>
+      <div>
+        <div class="card-title">QUARTETO</div>
+        <div class="card-sub">4 palavras · 9 tentativas</div>
+      </div>
+      <span class="arrow">→</span>
+    </div>
+    <div class="mini-boards">
+      <div class="mini-board">
+        <div class="mini-row"><div class="mini-tile"></div><div class="mini-tile"></div><div class="mini-tile p"></div><div class="mini-tile"></div><div class="mini-tile"></div></div>
+        <div class="mini-row"><div class="mini-tile r"></div><div class="mini-tile r"></div><div class="mini-tile r"></div><div class="mini-tile r"></div><div class="mini-tile r"></div></div>
+      </div>
+      <div class="mini-board">
+        <div class="mini-row"><div class="mini-tile p"></div><div class="mini-tile"></div><div class="mini-tile"></div><div class="mini-tile r"></div><div class="mini-tile"></div></div>
+        <div class="mini-row"><div class="mini-tile r"></div><div class="mini-tile r"></div><div class="mini-tile r"></div><div class="mini-tile r"></div><div class="mini-tile r"></div></div>
+      </div>
+      <div class="mini-board">
+        <div class="mini-row"><div class="mini-tile w"></div><div class="mini-tile p"></div><div class="mini-tile"></div><div class="mini-tile"></div><div class="mini-tile r"></div></div>
+        <div class="mini-row"><div class="mini-tile r"></div><div class="mini-tile r"></div><div class="mini-tile r"></div><div class="mini-tile r"></div><div class="mini-tile r"></div></div>
+      </div>
+      <div class="mini-board">
+        <div class="mini-row"><div class="mini-tile"></div><div class="mini-tile r"></div><div class="mini-tile"></div><div class="mini-tile p"></div><div class="mini-tile"></div></div>
+        <div class="mini-row"><div class="mini-tile r"></div><div class="mini-tile r"></div><div class="mini-tile r"></div><div class="mini-tile r"></div><div class="mini-tile r"></div></div>
+      </div>
+    </div>
+    <div class="card-status" id="status-quarteto">
+      <span class="status-badge badge-week">📅 Últimos 7 dias</span>
+    </div>
+  </a>
+</div>
+
+<footer>
+  <p>🔒 Site privado · Não indexado por buscadores</p>
+  <p>Palavras originais extraídas de <a href="https://term.ooo" target="_blank">term.ooo</a></p>
+</footer>
+
+<script src="assets/words_data.js"></script>
+<script src="assets/game.js"></script>
+<script>
+// Update card status badges based on saved game state
+(function() {
+  const modes = [
+    { mode: 1, id: 'status-termo' },
+    { mode: 2, id: 'status-dueto' },
+    { mode: 4, id: 'status-quarteto' }
+  ];
+  
+  const today = TERMO.getDayIndex();
+  
+  modes.forEach(({ mode, id }) => {
+    const saved = TERMO.loadState(mode, today);
+    const el = document.getElementById(id);
+    if (!el) return;
+    
+    if (saved?.won) {
+      el.innerHTML = '<span class="status-badge badge-won">✅ Acertou hoje!</span>';
+    } else if (saved?.gameOver) {
+      el.innerHTML = '<span class="status-badge badge-pending">❌ Perdeu hoje</span>';
+    } else {
+      el.innerHTML = '<span class="status-badge badge-pending">🎯 Jogue hoje!</span>';
+    }
+  });
+})();
+</script>
+</body>
+</html>
