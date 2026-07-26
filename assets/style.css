@@ -470,6 +470,78 @@ html, body {
   color: var(--color-text);
 }
 
+/* === TERMO GEOMETRIA FIEL === */
+.layout-termo {
+  --tile-size: clamp(50px, 9vmin, 62px);
+  --tile-gap: 6px;
+  --kb-gap: 6px;
+}
+
+.layout-termo .app-termo {
+  max-width: 540px;
+}
+
+.layout-termo .game-area {
+  justify-content: flex-start;
+  padding-top: 0.65rem;
+}
+
+.layout-termo .boards-container {
+  width: 100%;
+  padding: 0.3rem 0;
+}
+
+.layout-termo .board {
+  width: calc((var(--tile-size) * 5) + (var(--tile-gap) * 4));
+  margin: 0 auto;
+}
+
+.layout-termo .tile {
+  border-radius: 6px;
+  border-width: 2px;
+}
+
+.layout-termo .keyboard {
+  width: min(100%, 510px);
+  gap: var(--kb-gap);
+  padding: 0.55rem 0.3rem calc(0.55rem + env(safe-area-inset-bottom, 0px));
+}
+
+.layout-termo .keyboard-row {
+  display: grid;
+  gap: var(--kb-gap);
+}
+
+.layout-termo #row-1 {
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+}
+
+.layout-termo #row-2 {
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  width: 90%;
+  margin: 0 auto;
+}
+
+.layout-termo #row-3 {
+  grid-template-columns: 1.55fr repeat(7, minmax(0, 1fr)) 1.55fr;
+}
+
+.layout-termo .key {
+  height: clamp(50px, 7.3vh, 57px);
+  min-width: 0;
+  max-width: none;
+  flex: none;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0;
+}
+
+.layout-termo .key.wide {
+  max-width: none;
+  font-size: 0.76rem;
+}
+
 /* === RESPONSIVE === */
 @media (max-width: 480px) {
   :root {
@@ -489,6 +561,28 @@ html, body {
   .key.wide { font-size: 0.58rem; }
   
   .boards-container { gap: 0.5rem; }
+}
+
+@media (max-width: 420px) {
+  .layout-termo {
+    --tile-size: clamp(44px, 12.2vw, 54px);
+    --tile-gap: 5px;
+    --kb-gap: 5px;
+  }
+
+  .layout-termo .keyboard {
+    width: 100%;
+    padding-inline: 0.2rem;
+  }
+
+  .layout-termo .key {
+    height: clamp(44px, 7.1vh, 52px);
+    font-size: 0.85rem;
+  }
+
+  .layout-termo .key.wide {
+    font-size: 0.68rem;
+  }
 }
 
 @media (max-height: 650px) {
