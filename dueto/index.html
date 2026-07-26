@@ -208,7 +208,7 @@
     if (key === 'enter') { submitGuess(); }
     else if (key === 'backspace') { if (currentInput.length > 0) { currentInput.pop(); updateCurrentRow(); } }
     else if (/^[a-záéíóúâêîôûãõçàü]$/.test(key) && currentInput.length < WORD_LEN) {
-      currentInput.push(key); updateCurrentRow();
+      currentInput.push(TERMO.normalizeWord(key)); updateCurrentRow();
     }
   }
   
@@ -313,9 +313,10 @@
   function updateKeyboard(letters, result) {
     const priority = { right: 3, place: 2, wrong: 1 };
     letters.forEach((letter, i) => {
-      const current = keyStates[letter];
+      const normalizedLetter = TERMO.normalizeWord(letter);
+      const current = keyStates[normalizedLetter];
       const newState = result[i];
-      if (!current || priority[newState] > priority[current]) keyStates[letter] = newState;
+      if (!current || priority[newState] > priority[current]) keyStates[normalizedLetter] = newState;
     });
     document.querySelectorAll('.key[data-key]').forEach(key => {
       const k = key.dataset.key.toLowerCase();

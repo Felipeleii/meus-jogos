@@ -261,7 +261,7 @@
         updateCurrentRow();
       }
     } else if (/^[a-záéíóúâêîôûãõçàü]$/.test(key) && currentInput.length < WORD_LEN) {
-      currentInput.push(key);
+      currentInput.push(TERMO.normalizeWord(key));
       updateCurrentRow();
     }
   }
@@ -286,7 +286,8 @@
       return;
     }
     
-    const guessStr = currentInput.join('');
+    const guess = [...currentInput];
+    const guessStr = guess.join('');
     const accented = TERMO.denormalizeWord(guessStr);
     
     // Validate
@@ -297,12 +298,12 @@
     }
     
     // Check against target
-    const result = TERMO.checkGuess(currentInput, targetWords[0].split(''));
+    const result = TERMO.checkGuess(guess, targetWords[0].split(''));
     
     // Animate tiles
-    animateTiles(currentRow, currentInput, accented.split ? accented.split('') : currentInput, result, () => {
+    animateTiles(currentRow, guess, accented.split ? accented.split('') : guess, result, () => {
       // Update keyboard
-      updateKeyboard(currentInput, result);
+      updateKeyboard(guess, result);
       
       // Check win/lose
       const isWin = result.every(r => r === 'right');
@@ -326,11 +327,10 @@
         updateCurrentRow();
       }
       
-      guesses.push({ guess: [...currentInput], result });
       saveCurrentState();
     });
     
-    guesses.push({ guess: [...currentInput], result });
+    guesses.push({ guess, result });
     currentInput = [];
   }
   
@@ -365,10 +365,11 @@
   function updateKeyboard(letters, result) {
     const priority = { right: 3, place: 2, wrong: 1 };
     letters.forEach((letter, i) => {
-      const current = keyStates[letter];
+      const normalizedLetter = TERMO.normalizeWord(letter);
+      const current = keyStates[normalizedLetter];
       const newState = result[i];
       if (!current || priority[newState] > priority[current]) {
-        keyStates[letter] = newState;
+        keyStates[normalizedLetter] = newState;
       }
     });
     

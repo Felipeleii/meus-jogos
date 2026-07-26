@@ -17,7 +17,7 @@
   --color-header: #5c4a52;
   --color-key: #776068;
   --color-key-hover: #887078;
-  --tile-size: min(62px, 11vw);
+  --tile-size: clamp(46px, 11vw, 62px);
   --tile-gap: 5px;
   --font: 'Mitr', sans-serif;
 }
@@ -278,17 +278,21 @@ html, body {
   padding: 0.5rem;
   padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
   flex-shrink: 0;
+  width: min(100%, 560px);
+  margin: 0 auto;
 }
 
 .keyboard-row {
   display: flex;
-  gap: 5px;
+  gap: clamp(3px, 1.2vw, 5px);
   justify-content: center;
 }
 
 .key {
-  height: 58px;
-  min-width: 36px;
+  height: clamp(44px, 8vh, 58px);
+  min-width: clamp(24px, 8vw, 30px);
+  flex: 1 1 30px;
+  max-width: 52px;
   padding: 0 0.4rem;
   border-radius: 8px;
   border: none;
@@ -307,7 +311,7 @@ html, body {
 
 .key:hover { background: var(--color-key-hover); }
 .key:active { transform: scale(.95); }
-.key.wide { min-width: 60px; font-size: 0.65rem; }
+.key.wide { flex: 1.6 1 0; max-width: 82px; font-size: 0.65rem; }
 .key.right { background: var(--color-right); }
 .key.place { background: var(--color-place); }
 .key.wrong { background: var(--color-wrong); color: var(--color-wrong-fg); }
@@ -469,16 +473,28 @@ html, body {
 /* === RESPONSIVE === */
 @media (max-width: 480px) {
   :root {
-    --tile-size: min(52px, 14vw);
+    --tile-size: clamp(42px, 13vw, 52px);
     --tile-gap: 4px;
   }
   
-  .key { height: 48px; min-width: 30px; font-size: 0.7rem; }
-  .key.wide { min-width: 50px; font-size: 0.6rem; }
+  .header { height: 52px; padding: 0 0.75rem; }
+  .header-title { font-size: 1.2rem; }
+  .header-subtitle { font-size: 0.65rem; }
+  .header-nav { gap: 0.3rem; }
+  .btn-icon { padding: 0.3rem 0.55rem; }
+  .date-nav { gap: 0.3rem; padding: 0.3rem 0.5rem; }
+  .date-btn { padding: 0.2rem 0.35rem; font-size: 0.65rem; }
+  .date-current { min-width: clamp(70px, 25vw, 96px); font-size: 0.7rem; }
+  .key { font-size: 0.7rem; }
+  .key.wide { font-size: 0.58rem; }
   
   .boards-container { gap: 0.5rem; }
 }
 
 @media (max-height: 650px) {
-  .key { height: 44px; }
+  :root { --tile-size: clamp(38px, 10vh, 48px); }
+  .header { height: 48px; }
+  .date-nav { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+  .keyboard { gap: 4px; padding-top: 0.35rem; }
+  .key { height: 40px; }
 }
