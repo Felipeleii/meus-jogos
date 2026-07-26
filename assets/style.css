@@ -291,7 +291,7 @@ html, body {
 .key {
   height: clamp(44px, 8vh, 58px);
   min-width: 0;
-  flex: 1 1 0;
+  flex: 1 1 30px;
   max-width: 52px;
   padding: 0 0.4rem;
   border-radius: 8px;
