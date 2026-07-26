@@ -472,7 +472,7 @@ html, body {
 
 /* === TERMO GEOMETRIA FIEL === */
 .layout-termo {
-  /* vmin mantém a escala do tabuleiro estável entre orientações sem perder proporção geral */
+  /* padrão geral: vmin replica melhor a escala do Termo em desktop/tablet e paisagem */
   --tile-size: clamp(50px, 9vmin, 62px);
   --tile-gap: 6px;
   --kb-gap: 6px;
@@ -524,7 +524,7 @@ html, body {
 }
 
 .layout-termo #row-3 {
-  /* 1.55fr aproxima a largura visual das teclas especiais (Enter/Backspace) do Termo original */
+  /* proporção ~1.55:1 foi calibrada para aproximar a razão Enter/tecla comum do Termo original */
   grid-template-columns: 1.55fr repeat(7, minmax(0, 1fr)) 1.55fr;
 }
 
@@ -567,7 +567,7 @@ html, body {
 
 @media (max-width: 420px) {
   .layout-termo {
-    /* em telas muito estreitas, vw evita encolhimento excessivo que ocorre com vmin em retrato */
+    /* exceção mobile estreito: vw preserva legibilidade em retrato quando vmin encolheria demais */
     --tile-size: clamp(44px, 12.2vw, 54px);
     --tile-gap: 5px;
     --kb-gap: 5px;
