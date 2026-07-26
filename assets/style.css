@@ -290,7 +290,7 @@ html, body {
 
 .key {
   height: clamp(44px, 8vh, 58px);
-  min-width: 0;
+  min-width: clamp(24px, 8vw, 30px);
   flex: 1 1 30px;
   max-width: 52px;
   padding: 0 0.4rem;
@@ -484,7 +484,7 @@ html, body {
   .btn-icon { padding: 0.3rem 0.55rem; }
   .date-nav { gap: 0.3rem; padding: 0.3rem 0.5rem; }
   .date-btn { padding: 0.2rem 0.35rem; font-size: 0.65rem; }
-  .date-current { min-width: 96px; font-size: 0.7rem; }
+  .date-current { min-width: clamp(70px, 25vw, 96px); font-size: 0.7rem; }
   .key { font-size: 0.7rem; }
   .key.wide { font-size: 0.58rem; }
   
