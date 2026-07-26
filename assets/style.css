@@ -474,8 +474,22 @@ html, body {
 .layout-termo {
   /* padrão geral: vmin replica melhor a escala do Termo em desktop/tablet e paisagem */
   --tile-size: clamp(50px, 9vmin, 62px);
-  --tile-gap: 6px;
-  --kb-gap: 6px;
+  --tile-gap: 5px;
+  --kb-gap: 5px;
+}
+
+.layout-termo .header {
+  height: 48px;
+}
+
+.layout-termo .btn-icon {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+  border-color: rgba(255,255,255,.2);
+}
+
+.layout-termo .date-nav {
+  padding: 0.25rem 1rem;
 }
 
 .layout-termo .app-termo {
@@ -483,13 +497,14 @@ html, body {
 }
 
 .layout-termo .game-area {
-  justify-content: flex-start;
-  padding-top: 0.65rem;
+  justify-content: flex-end;
+  padding-top: 0.4rem;
+  padding-bottom: 0.3rem;
 }
 
 .layout-termo .boards-container {
   width: 100%;
-  padding: 0.3rem 0;
+  padding: 0.15rem 0;
 }
 
 .layout-termo .board {
@@ -505,7 +520,7 @@ html, body {
 .layout-termo .keyboard {
   width: min(100%, 510px);
   gap: var(--kb-gap);
-  padding: 0.55rem 0.3rem calc(0.55rem + env(safe-area-inset-bottom, 0px));
+  padding: 0.4rem 0.3rem calc(0.4rem + env(safe-area-inset-bottom, 0px));
 }
 
 .layout-termo .keyboard-row {
@@ -524,8 +539,8 @@ html, body {
 }
 
 .layout-termo #row-3 {
-  /* proporção ~1.55:1 foi calibrada para aproximar a razão Enter/tecla comum do Termo original */
-  grid-template-columns: 1.55fr repeat(7, minmax(0, 1fr)) 1.55fr;
+  /* ENVIAR à direita, ⌫ antes dele – fiel ao Termo original */
+  grid-template-columns: repeat(7, minmax(0, 1fr)) 1.55fr 1.55fr;
 }
 
 .layout-termo .key {
